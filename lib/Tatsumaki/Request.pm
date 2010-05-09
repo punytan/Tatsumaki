@@ -1,13 +1,12 @@
 package Tatsumaki::Request;
 use Encode;
 use parent qw(Plack::Request);
-
 use Tatsumaki::Response;
 
-sub _build_parameters {
+sub decoded_parameters {
     my $self = shift;
 
-    my $params = $self->SUPER::_build_parameters();
+    my $params = $self->SUPER::parameters();
 
     my $decoded_params = {};
     while (my($k, $v) = each %$params) {
@@ -16,6 +15,12 @@ sub _build_parameters {
     }
 
     return $decoded_params;
+}
+
+sub decoded_param {
+    my $self = shift;
+
+    return decode_utf8 $self->param(@_);
 }
 
 sub new_response {

@@ -14,7 +14,7 @@ use Tatsumaki::MessageQueue;
 sub get {
     my($self, $channel) = @_;
     my $mq = Tatsumaki::MessageQueue->instance($channel);
-    my $client_id = $self->request->param('client_id')
+    my $client_id = $self->request->decoded_param('client_id')
         or Tatsumaki::Error::HTTP->throw(500, "'client_id' needed");
     $client_id = rand(1) if $client_id eq 'dummy'; # for benchmarking stuff
     $mq->poll_once($client_id, sub { $self->on_new_event(@_) });
@@ -33,7 +33,7 @@ __PACKAGE__->asynchronous(1);
 sub get {
     my($self, $channel) = @_;
 
-    my $client_id = $self->request->param('client_id') || rand(1);
+    my $client_id = $self->request->decoded_param('client_id') || rand(1);
 
     $self->multipart_xhr_push(1);
 
@@ -54,7 +54,8 @@ use Encode;
 sub post {
     my($self, $channel) = @_;
 
-    my $v = $self->request->params;
+    my $v = $self->request->decoded_parameters;
+
     my $html = $self->format_message($v->{text});
     my $mq = Tatsumaki::MessageQueue->instance($channel);
     $mq->publish({
